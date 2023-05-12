@@ -1,0 +1,17 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        maven {
+            url 'https://jitpack.io'
+        }
+    }
+    resolutionStrategy {
+        eachPlugin {
+            if (requested.id.id == 'org.springdoc.openapi-gradle-plugin') {
+                useModule('com.github.Sineaggi:springdoc-openapi-gradle-plugin:c193d14') // can also be a branch, i.e. `master-SNAPSHOT`
+            }
+        }
+    }
+}
+
+rootProject.name = 'wc3server'

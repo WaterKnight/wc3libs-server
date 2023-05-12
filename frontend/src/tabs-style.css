@@ -1,0 +1,15 @@
+ul {
+    
+}
+
+ul > li {
+    display: inline-block;
+    margin: 0.25em;
+    padding: 0.25em;
+    border: 1px solid black
+}
+
+ul > li:hover {
+    background-color: aliceblue;
+    cursor: pointer;
+}

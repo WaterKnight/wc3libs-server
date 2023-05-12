@@ -1,0 +1,117 @@
+plugins {
+    id 'org.springframework.boot' version '2.7.8'
+    //id 'com.github.Sineaggi:springdoc-openapi-gradle-plugin:c193d14'
+    id "org.springdoc.openapi-gradle-plugin" version "1.6.0"
+    id 'java'
+    id 'application'
+    //id "io.freefair.lombok" version "8.0.1"
+}
+
+apply plugin: 'io.spring.dependency-management'
+
+group 'net.moonlightflower'
+version '1.0-SNAPSHOT'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+    maven { url 'https://jitpack.io' }
+}
+
+application {
+    mainClass = 'net.moonlightflower.wc3server.Wc3ServerApplication'
+}
+
+sourceSets {
+    kaitai {
+        java {
+            srcDirs("generated-sources/kaitai/java")
+        }
+        resources {
+            srcDirs("generated-sources/kaitai/resources")
+        }
+    }
+
+    abc {
+        java {
+            srcDirs("generated-sources/abc/java")
+        }
+    }
+
+    main {
+        java {
+            compileClasspath += kaitai.compileClasspath + kaitai.output
+            runtimeClasspath += kaitai.runtimeClasspath + kaitai.output
+        }
+    }
+}
+
+dependencies {
+    //implementation project(path: ':')
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+
+    implementation platform('org.springframework.boot:spring-boot-dependencies:2.7.8')
+
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
+
+    kaitaiImplementation 'io.kaitai:kaitai-struct-runtime:0.10'
+
+    //implementation sourceSets.kaitai.output
+
+    implementation group: 'com.github.inwc3', name: 'jmpq3', version: 'b4ef7121a4'
+    implementation 'net.moonlightflower:wc3libs:1.1.2'
+
+    // https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.12.7.1'
+
+    compileOnly 'org.projectlombok:lombok:1.18.26'
+    annotationProcessor 'org.projectlombok:lombok:1.18.26'
+
+    testCompileOnly 'org.projectlombok:lombok:1.18.26'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.26'
+
+    implementation group: 'org.springdoc', name: 'springdoc-openapi', version: '1.7.0'
+    implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: '1.7.0'
+}
+
+task makeFatJar(type: Jar) {
+    manifest {
+        attributes 'Main-Class': 'net.moonlightflower.wc3server.Wc3ServerApplication'
+    }
+    archiveBaseName = 'wc3server-all'
+    duplicatesStrategy = DuplicatesStrategy.WARN
+    from sourceSets.main.output,
+            configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    with jar
+    //exclude('META-INF/*.SF', 'META-INF/*.DSA')
+}
+
+test {
+    useJUnitPlatform()
+}
+
+tasks.named("bootJar") {
+    launchScript()
+}
+
+openApi {
+    //apiDocsUrl.set("https://localhost:9000/api/docs")
+    outputDir.set(file("$buildDir/docs"))
+    outputFileName.set("openapi.yaml")
+    //waitTimeInSeconds.set(10)
+    //groupedApiMappings.set(["https://localhost:8080/v3/api-docs/groupA" to "swagger-groupA.json",
+    //                        "https://localhost:8080/v3/api-docs/groupB" to "swagger-groupB.json"])
+    //customBootRun {
+    //    args.set(["--spring.profiles.active=special"])
+    //}
+}
